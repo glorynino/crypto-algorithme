@@ -92,4 +92,3 @@ Ce projet propose une implémentation simple du One-Time Pad pour :
 - chiffrer un message
 - déchiffrer un message
 
-```
