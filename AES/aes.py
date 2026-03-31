@@ -1,3 +1,6 @@
+from AES.utils import create_state_matrix, state_to_bytes
+
+
 S_BOX = [
 0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
 0xca,0x82,0xc9,0x7d,0xfa,0x59,0x47,0xf0,0xad,0xd4,0xa2,0xaf,0x9c,0xa4,0x72,0xc0,
@@ -62,3 +65,38 @@ def mix_columns(state):
         state[3][col] = galois_mult(s0, 3) ^ s1 ^ s2 ^ galois_mult(s3, 2)
     
     return state
+
+
+def add_round_key(state, round_key):
+    if len(state) != 4 or any(len(row) != 4 for row in state):
+        raise ValueError("State must be a 4x4 matrix.")
+    if len(round_key) != 16:
+        raise ValueError("Round key must be 16 bytes.")
+    
+    for row in range(4):
+        for col in range(4):
+            state[row][col] ^= round_key[col * 4 + row]
+    
+    return state
+
+def aes_encrypt_block(plaintext_block, round_keys):
+    if len(plaintext_block) != 16:
+        raise ValueError("Plaintext block must be 16 bytes.")
+    if len(round_keys) != 11:
+        raise ValueError("There must be 11 round keys for AES-128.")
+    
+    state = create_state_matrix(plaintext_block)
+    
+    state = add_round_key(state, round_keys[0])
+    
+    for round in range(1, 10):
+        state = sub_bytes(state)
+        state = shift_rows(state)
+        state = mix_columns(state)
+        state = add_round_key(state, round_keys[round])
+    
+    state = sub_bytes(state)
+    state = shift_rows(state)
+    state = add_round_key(state, round_keys[10])
+    
+    return state_to_bytes(state)
