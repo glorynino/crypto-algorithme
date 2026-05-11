@@ -13,13 +13,21 @@ def bytes_to_text(byte_data):
 
 def pkcs7_pad(data, block_size=16):
     """Apply PKCS#7 padding to data."""
+    if block_size <= 0 or block_size > 255:
+        raise ValueError("block_size must be between 1 and 255.")
     padding_length = block_size - (len(data) % block_size)
     return data + bytes([padding_length] * padding_length)
 
 
 def pkcs7_unpad(data):
     """Remove PKCS#7 padding from data."""
+    if not data:
+        raise ValueError("Invalid PKCS#7 padding.")
+
     padding_length = data[-1]
+
+    if padding_length < 1 or padding_length > len(data):
+        raise ValueError("Invalid PKCS#7 padding.")
     
     if data[-padding_length:] != bytes([padding_length] * padding_length):
         raise ValueError("Invalid PKCS#7 padding.")
@@ -36,8 +44,8 @@ def create_aes_blocks(text):
     """Prepare text/bytes into padded AES blocks."""
     if isinstance(text, str):
         return split_blocks(pkcs7_pad(text_to_bytes(text)))
-    elif isinstance(text, bytes):
-        return split_blocks(pkcs7_pad(text))
+    elif isinstance(text, (bytes, bytearray)):
+        return split_blocks(pkcs7_pad(bytes(text)))
     else:
         raise TypeError("Input must be a string or bytes.")
 

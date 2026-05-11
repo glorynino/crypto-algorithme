@@ -174,19 +174,17 @@ class AES128:
     def encrypt(self, plaintext):
         """Encrypt plaintext (string or bytes) with ECB mode."""
         blocks = create_aes_blocks(plaintext)
-        ciphertext = b''
-        for block in blocks:
-            ciphertext += self._encrypt_block(block)
-        return ciphertext
+        return b"".join(self._encrypt_block(block) for block in blocks)
     
     def decrypt(self, ciphertext):
         """Decrypt ciphertext (bytes) with ECB mode."""
         if len(ciphertext) % 16 != 0:
             raise ValueError("Ciphertext length must be multiple of 16 bytes.")
         
-        plaintext = b''
-        for i in range(0, len(ciphertext), 16):
-            plaintext += self._decrypt_block(ciphertext[i:i+16])
+        plaintext = b"".join(
+            self._decrypt_block(ciphertext[i:i + 16])
+            for i in range(0, len(ciphertext), 16)
+        )
         
         return pkcs7_unpad(plaintext)
     

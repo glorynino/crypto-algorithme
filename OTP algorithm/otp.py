@@ -1,35 +1,42 @@
-import os 
+"""One-time pad helpers."""
 
-#OTP encryption
+from __future__ import annotations
+
+import os
+from typing import Iterable
+
+
+def _coerce_bytes(value: str | bytes | bytearray | Iterable[int]) -> bytes:
+    if isinstance(value, bytes):
+        return value
+    if isinstance(value, bytearray):
+        return bytes(value)
+    if isinstance(value, str):
+        return value.encode()
+    return bytes(value)
+
 
 def encryption(message):
-    resultat=[]
-    input_bytes=message.encode()
-    key = os.urandom(len(input_bytes))
-    #dans otp la key est generer aleatoirement pas "pseudo-aleatoire"
-    for x,y in zip(input_bytes,key):
-        resultat.append(x^y)
-    
-    return resultat,key
+    message_bytes = _coerce_bytes(message)
+    key = os.urandom(len(message_bytes))
+    ciphertext = bytes(left ^ right for left, right in zip(message_bytes, key))
+    return ciphertext, key
 
 
-def decryption(resultat,key):
-    #on fait "zip" pour reunir chaque element de "resultat" et "key" dans un seule ellement 
-    #en gros resultat = [1,2,3] et key = [4,5,6] alors zip(resultat,key) = [(1,4),(2,5),(3,6)]
-    message = []
-    for x,y in zip(resultat,key): 
-        message.append(x^y)
-     
-    return bytes(message).decode()  #obliger de faire bytes pour faire decode et le convertir en string  
-    '''bytes([72, 105])  →  b"Hi"
-       bytes([72, 105]).decode()  →  "Hi"
-    '''
-   
+def decryption(resultat, key):
+    ciphertext = _coerce_bytes(resultat)
+    key_bytes = _coerce_bytes(key)
+    if len(ciphertext) != len(key_bytes):
+        raise ValueError("Ciphertext and key must have the same length.")
+
+    message = bytes(left ^ right for left, right in zip(ciphertext, key_bytes))
+    return message.decode()
+
 
 if __name__ == "__main__":
     message = "Hello World"
-    print("Message: ",message)
-    resultat,key = encryption(message)
-    print("Encrypted: ",resultat)
-    decrypted_message = decryption(resultat,key)
-    print("Decrypted: ",decrypted_message)
+    print("Message:", message)
+    resultat, key = encryption(message)
+    print("Encrypted:", resultat)
+    decrypted_message = decryption(resultat, key)
+    print("Decrypted:", decrypted_message)
