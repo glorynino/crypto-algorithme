@@ -1,0 +1,428 @@
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    TP 3 - CRYPTOGRAPHIE ASYMÉTRIQUE                        ║
+║            Diffie-Hellman, RSA, ElGamal, et Courbes Elliptiques            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+================================================================================
+  EXERCICE 3.1 - DIFFIE-HELLMAN (ÉCHANGE DE CLÉS)
+================================================================================
+
+Diffie-Hellman Key Exchange:
+  • 1976: Whitfield Diffie & Martin Hellman
+  • Allows secure key establishment over public channel
+  • Based on discrete logarithm problem (hard in Fp*)
+  • NOT authenticated (vulnerable to MITM)
+
+
+======================================================================
+BASIC DIFFIE-HELLMAN KEY EXCHANGE TEST
+======================================================================
+
+Public parameters:
+  p = 1000000007
+  g = 2
+
+Alice's keypair:
+  Private: a = 926204847
+  Public:  A = g^a mod p = 600670515
+
+Bob's keypair:
+  Private: b = 232582480
+  Public:  B = g^b mod p = 426186204
+
+Alice computes:
+  K = B^a mod p = 346135780
+
+Bob computes:
+  K = A^b mod p = 346135780
+
+Shared secret match: True ✓
+
+Security analysis:
+  Eavesdropper knows: p, g, A=600670515, B=426186204
+  Eavesdropper needs: discrete log to recover a or b
+  With p=1000000007 bits, log_2(p) = 30 bits
+  Discrete log is hard for large p
+
+
+
+======================================================================
+POHLIG-HELLMAN ATTACK: Small Factor Exploitation
+======================================================================
+
+Attacker knows:
+  Public parameters: p=1019, g=2
+  Bob's public key: B = g^b mod p = 567
+
+Factorization of p-1:
+  2^1
+  509^1
+
+Attacking using small factors:
+  b ≡ 1 (mod 2)
+  b ≡ 123 (mod 509)
+
+Combining using CRT:
+  Recovered private key (mod product of factors): 123
+  Note: This narrows down from 2^10 to ~2^5
+
+✓ DH Exercises Completed
+
+================================================================================
+  EXERCICE 3.2 - RSA (CHIFFREMENT ASYMÉTRIQUE)
+================================================================================
+
+RSA (Rivest-Shamir-Adleman):
+  • 1977: First practical public-key cryptosystem
+  • Based on difficulty of integer factorization
+  • Used for both encryption and digital signatures
+  • Requires careful padding (OAEP, PSS)
+
+
+======================================================================
+BASIC RSA TEST
+======================================================================
+
+Generating 1024-bit RSA keypair...
+✓ Generated
+  Modulus: 1024-bit
+  Public exponent: 65537
+  Private exponent: 1023-bit
+
+Plaintext: b'SECRET'
+Ciphertext: 51883752787710545101044677800031865884294982866249119642301076104110473115858095796364965726980242079480148579185909738360740289370860834619814519195310557320637982867592428319421351258624041245980741978424303073154784779989013868503265510013631635006927356340691660929876953530579073206716970427311050292565
+
+Decrypted: 91556947314004
+Match: True ✓
+
+Message: b'SIGN ME'
+Signature: 18576464483309502626337237458646608874029890291570887043970880914840264275701851041213087832388265328154344319718186204023472791283991235359364012755714854899714406813715452952682448458488415727707892020526729877668574626791070570843410675420525557334953814348674158038521157668497451876077155062846239922433
+
+Signature valid: True ✓
+
+
+Demonstrating RSA Vulnerabilities:
+
+======================================================================
+SMALL EXPONENT ATTACK (e=3)
+======================================================================
+
+Target RSA public key: (n, e)
+  n = 3233
+  e = 3 (very small)
+
+Attacker intercepts ciphertext: c = 2962
+
+Attack: If m^e < n, then c = m^e (NO modular reduction)
+  Therefore: m = ∛c (cube root)
+
+Plaintext too large, fell in modular reduction:
+  m^e ≥ n, so c ≡ m^e (mod n) but ≠ m^e
+
+
+✓ RSA Exercises Completed
+
+================================================================================
+  EXERCICE 3.3 - ELGAMAL (CHIFFREMENT À CLÉS PUBLIQUES)
+================================================================================
+
+ElGamal Encryption:
+  • 1984: Taher ElGamal
+  • Based on Diffie-Hellman key exchange
+  • Probabilistic encryption (randomness per message)
+  • Homomorphic properties (can be abused)
+
+
+======================================================================
+BASIC ELGAMAL TEST
+======================================================================
+
+Parameters:
+  p = 1000000007
+  g = 2
+
+Alice's private key: x = 977693797
+Alice's public key:  h = 776773236
+
+Plaintext: 123456
+Ciphertext: (838575155, 106597981)
+
+Decrypted: 123456
+Match: True ✓
+
+
+Demonstrating ElGamal Vulnerabilities:
+
+======================================================================
+ELGAMAL HOMOMORPHIC PROPERTY ATTACK
+======================================================================
+
+
+ElGamal encryption structure:
+  Ciphertext: (c1, c2) where c1 = g^k, c2 = h^k * m
+  
+Homomorphic property:
+  E(m1) = (c1_1, c2_1) where c2_1 = h^k1 * m1
+  E(m2) = (c1_2, c2_2) where c2_2 = h^k2 * m2
+  
+  E(m1) * E(m2) = (c1_1 * c1_2, c2_1 * c2_2)
+                = (g^(k1+k2), h^(k1+k2) * m1 * m2)
+                = E(m1 * m2)
+  
+Attack Applications:
+  
+  1. Chosen Plaintext Attack:
+     - Attacker queries encryption oracle for m1, m2, ...
+     - Computes: c' = E(m1) * E(m2) = E(m1 * m2)
+     - Can generate ciphertexts for plaintexts never queried!
+  
+  2. Signature Forgery (if used for signatures):
+     - Attacker can forge valid signatures without key
+     - Multiply/modulate existing signatures
+  
+  3. Vote Manipulation (in voting systems):
+     - Multiply vote ciphertexts to change totals
+     - Without breaking encryption
+  
+Defense:
+  • Add authentication (sign ciphertexts)
+  • Use randomization in decryption (check plaintext likely)
+  • Use IND-CCA2 secure encryption (padding + authentication)
+  • Add redundancy: hash plaintext + append it
+  • Use proven secure constructions (not textbook)
+    
+
+✓ ElGamal Exercises Completed
+
+================================================================================
+  EXERCICE 3.4 - CRYPTOGRAPHIE SUR COURBES ELLIPTIQUES
+================================================================================
+
+Elliptic Curve Cryptography:
+  • 1985: Neal Koblitz & Victor Miller (independently)
+  • Based on elliptic curve discrete logarithm problem
+  • Smaller keys than RSA/DH for same security
+  • Modern standard (TLS 1.3, Signal, Bitcoin)
+
+
+======================================================================
+ECDH BASIC EXAMPLE (Small Curve for Demo)
+======================================================================
+
+Elliptic Curve: y^2 = x^3 + -3x + 2455155546008943817740293915197451784769108058161191238065 (mod 6277101735386680763835789423207666416083908700390324961279)
+Base point G = (602046282375688656601964616666194642317432387279335085969643, 174050332293622031404857552280219410364023553197256146129584)
+Order of G: 6277101735386680763835789423176059013767194773182842284081
+
+Alice's private key: a = 3691824577029595487210388019409958567711425589966871930013
+Alice's public key:  A = a·G = (4023058236550689955806083586751010983910762805284909087517, 230450182417057833828651349526942178449444460629511067456)
+
+Bob's private key: b = 3746344544127821980564087495523492449977281088864240869073
+Bob's public key:  B = b·G = (6266181243883500184023143163170719342160605021439094459498, 5354893357988471220756335120668590173941233987218307710248)
+
+Shared secret (Alice): K = a·B = (200269707197283355532014844575764356480462823063660471639, 2154691817164478355483499390993070864282641867419867929665)
+Shared secret (Bob):   K = b·A = (200269707197283355532014844575764356480462823063660471639, 2154691817164478355483499390993070864282641867419867929665)
+Match: True ✓
+
+
+======================================================================
+ECDSA DIGITAL SIGNATURE EXAMPLE
+======================================================================
+
+ECDSA Components:
+  Private key: d (random integer 1 < d < n)
+  Public key:  Q = d·G (point on curve)
+  Message hash: h (output of SHA-2 or similar)
+
+Signing:
+  1. Generate random k, compute R = k·G = (r, y)
+  2. Compute r = R.x mod n
+  3. Compute s = k^(-1)(h + r·d) mod n
+  4. Signature: (r, s)
+
+Verification:
+  1. Receive (r, s) and message hash h
+  2. Compute w = s^(-1) mod n
+  3. Compute u1 = h·w mod n
+  4. Compute u2 = r·w mod n
+  5. Compute (x, y) = u1·G + u2·Q
+  6. Valid if x mod n = r
+
+Security:
+  • Requires k to be random (NOT predictable)
+  • Leak of k completely breaks signature
+  • k must never repeat (or same message/different message)
+  • Sony PS3 jailbreak exploited k reuse
+
+Demonstrating ECC Vulnerabilities:
+
+======================================================================
+TIMING ATTACK ON ECC SCALAR MULTIPLICATION
+======================================================================
+
+
+Problem: Scalar multiplication algorithm takes different time
+         based on bits of scalar (private key)
+  
+Binary Method (double-and-add):
+  result ← O (infinity)
+  for each bit b of scalar (MSB to LSB):
+    result ← 2 × result     (point doubling, ALWAYS)
+    if b = 1:
+      result ← result + P   (point addition, CONDITIONAL)
+  
+Time Leak:
+  • Point addition sometimes skipped
+  • More 1-bits → more time
+  • More 0-bits → less time
+  • Attack: time multiple operations, deduce bit pattern
+  
+Attack Steps:
+  1. Measure time for 1000 ECDH operations
+  2. Correlate with private key bits
+  3. Recover bits of d
+  4. With enough measurements: full key recovery
+  
+Real Example (OpenSSL CVE):
+  • Pre-2014 OpenSSL vulnerable
+  • Remote timing attack via network latency
+  • Could recover key from HTTPS sessions
+  
+Defense (Constant-Time Implementation):
+  • Montgomery ladder: always does same operations
+    Handles both 0 and 1 bits identically
+    
+  • Unified point addition formula:
+    Add = Dbl (mathematically, same operation)
+    
+  • Constant-time comparison
+  
+  • Random blinding of scalar:
+    d' = d + k·n (where n is group order)
+    Same result, different timing
+    
+  • Use constant-time library (libsodium, etc.)
+  
+Modern Status:
+  • Hardware accelerators (AES-NI, etc.)
+  • Also provide timing-attack resistant ECC
+  • TLS 1.3 uses safe curves by default
+    
+
+======================================================================
+ECDSA NONCE REUSE: COMPLETE KEY RECOVERY
+======================================================================
+
+
+ECDSA Signature: (r, s) where:
+  r = (k·G)_x mod n
+  s = k^(-1)(H + r·d) mod n
+  
+k is random nonce, MUST be unique per signature
+  
+If Same k Reused for Two Messages:
+  
+  Message m1: s1 = k^(-1)(H(m1) + r·d) mod n
+  Message m2: s2 = k^(-1)(H(m2) + r·d) mod n
+  (same r since same k, therefore same point k·G)
+  
+  Subtract: s1 - s2 = k^(-1)(H(m1) - H(m2)) mod n
+  
+  Solve for k:
+    k = (H(m1) - H(m2)) / (s1 - s2) mod n
+  
+  Then recover private key:
+    d = r^(-1)(k·s1 - H(m1)) mod n
+  
+COMPLETE BREAK: One bit leak of k enough to recover d!
+  
+Real-World Disasters:
+  
+  1. PlayStation 3 (2010):
+     - Used fixed k (implementation bug)
+     - Every game signature same k
+     - Reversed complete PKA
+  
+  2. Bitcoin ECDSA Vulnerability (2013):
+     - Some implementations reused k
+     - Exposed private keys
+  
+  3. Android SecureRandom (2013):
+     - Weak random number generation
+     - k reuse in ECDSA signatures
+  
+Defense:
+  • Use deterministic ECDSA (RFC 6979)
+    - k = HMAC-SHA256(d, H(msg))
+    - Same message always gives same k (no privacy leak)
+    - Different messages give different k(never reuse)
+    
+  • Or: Use EdDSA (Ed25519)
+    - Deterministic by default
+    - Simpler, fewer pitfalls
+    - k never exposed
+  
+  • Verify implementation uses strong PRNG
+  • Test: sign same message twice, should get different (r,s)
+    
+
+✓ ECC Exercises Completed
+
+================================================================================
+  SYNTHÈSE: COMPARAISON DH, RSA, ELGAMAL, ECC
+================================================================================
+
+┌─────────────┬──────────────┬──────────────┬──────────────┬──────────────┐
+│  Critère    │      DH      │      RSA     │   ElGamal    │      ECC     │
+├─────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+│ Année       │     1976     │     1977     │     1984     │   1985(+)    │
+│ Fondation   │  Disc. Log   │  PQC Hard    │  Disc. Log   │   ECDLP      │
+│ Clé Taille  │  2048+ bits  │  2048+ bits  │  2048+ bits  │  256-384 bits│
+│ Signature   │      ✗       │      ✓       │      ✓       │      ✓       │
+│ Vitesse     │      ◐       │      ◐       │      ◐       │      ✓ Rapide│
+│ Signa. Taille│     ✗        │    256-512B  │    512B+     │    64B (256) │
+├─────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+│ Sécurité    │   ✓ Sûr      │   ✓ Sûr      │  ◐ Si padding│  ✓ Sûr       │
+│ Attacks     │  Small subgp │  All textbook│  Homomorphic │  Timing, etc │
+│ Usage       │  Key exchange│  Encryption  │    Legacy     │  Moderne     │
+│ Productio.  │      ◐       │      ✓       │      ✗       │      ✓       │
+└─────────────┴──────────────┴──────────────┴──────────────┴──────────────┘
+
+Recommandations d'usage (2026):
+
+  KEY EXCHANGE (Perfect Forward Secrecy):
+    ✓ ECDH: X25519 / X448 (RECOMMANDÉ)
+    ~ DHE: RFC 7919 safe primes (compatible)
+    ✗ Static DH (weak)
+    ✗ No encryption: RSA (use for signatures)
+    
+  ENCRYPTION:
+    ✓ Hybrid: ECDH + AES-256-GCM
+    ✓ Or: RSA-OAEP + AES-256-GCM (legacy)
+    ✗ Textbook RSA/ElGamal without padding
+    ✗ Deterministic encryption
+    
+  SIGNATURES:
+    ✓ EdDSA (Ed25519) - moderne, simple, sûr
+    ✓ ECDSA (P-256) - standard
+    ~ RSA-PSS (acceptable)
+    ✗ ECDSA with weak k
+    ✗ Textbook RSA signature
+    
+  AUTHENTICATION:
+    ✓ Digital certificates (X.509)
+    ✓ Public key infrastructure (PKI)
+    ✓ Or: Out-of-band verification (Signal)
+    
+Algorithme sélection moderne (TLS 1.3):
+  • Handshake: ECDHE (X25519)
+  • Signature: ECDSA-P256 ou EdDSA
+  • Authentication: X.509 certificates
+  • Parfait Forward Secrecy: ✓ Automatique
+    
+
+================================================================================
+FIN DU TP 3
+================================================================================
+
