@@ -1,0 +1,3 @@
+# ignore python bytecode caches everywhere
+__pycache__/
+*.py[cod]
