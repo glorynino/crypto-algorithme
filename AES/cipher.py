@@ -1,7 +1,11 @@
 """AES-128 Cipher Implementation."""
 
-from constants import S_BOX, INV_S_BOX, R_CON
-from utils import create_state_matrix, state_to_bytes, create_aes_blocks, pkcs7_unpad
+try:
+    from constants import S_BOX, INV_S_BOX, R_CON
+    from utils import create_state_matrix, state_to_bytes, create_aes_blocks, pkcs7_unpad
+except ImportError:
+    from .constants import S_BOX, INV_S_BOX, R_CON
+    from .utils import create_state_matrix, state_to_bytes, create_aes_blocks, pkcs7_unpad
 
 
 class AES128:
