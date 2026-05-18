@@ -5,8 +5,19 @@
 
 set -e  # Exit on error
 
-CRYPTO_ROOT="/home/matt-anis/Studies/Crypto"
-VENV="${CRYPTO_ROOT}/.venv"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CRYPTO_ROOT="$SCRIPT_DIR"
+
+if [ -x "$CRYPTO_ROOT/env/bin/python3" ]; then
+    PYTHON="$CRYPTO_ROOT/env/bin/python3"
+    VENV="$CRYPTO_ROOT/env"
+elif [ -x "$CRYPTO_ROOT/.venv/bin/python3" ]; then
+    PYTHON="$CRYPTO_ROOT/.venv/bin/python3"
+    VENV="$CRYPTO_ROOT/.venv"
+else
+    PYTHON="$(command -v python3 || command -v python)"
+    VENV=""
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -44,24 +55,17 @@ if [ ! -d "$CRYPTO_ROOT" ]; then
 fi
 print_success "Workspace found: $CRYPTO_ROOT"
 
-# Check virtualenv
-if [ ! -d "$VENV" ]; then
-    print_error "Python virtualenv not found: $VENV"
-    echo "Create with: cd $CRYPTO_ROOT && python3 -m venv .venv"
+if [ -z "$PYTHON" ] || ! "$PYTHON" -c "import sys" 2>/dev/null; then
+    print_error "Python not found. Create venv: python -m venv env && pip install -r requirements.txt"
     exit 1
 fi
-print_success "Python environment found"
+print_success "Python: $PYTHON"
 
-# Activate virtualenv
-source "$VENV/bin/activate"
-print_success "Python environment activated"
-
-# Verify Python packages
 echo ""
 print_section "Checking Dependencies"
 
-python3 -c "import Crypto" && print_success "pycryptodome installed" || print_error "pycryptodome missing"
-python3 -c "import cryptography" && print_success "cryptography installed" || print_error "cryptography missing"
+"$PYTHON" -c "import Crypto" && print_success "pycryptodome installed" || print_error "pycryptodome missing"
+"$PYTHON" -c "import cryptography" && print_success "cryptography installed" || print_error "cryptography missing"
 
 # Run comprehensive test suite
 echo ""
@@ -71,7 +75,7 @@ echo ""
 cd "$CRYPTO_ROOT"
 
 # Execute main test suite
-python3 tp2_complete.py
+"$PYTHON" tp2_complete.py
 
 # Optional: Run individual exercises
 if [ "$1" == "--verbose" ]; then
@@ -80,19 +84,19 @@ if [ "$1" == "--verbose" ]; then
     
     echo ""
     print_section "Exercise 2.1 - RC4"
-    python3 RC4/rc4_attacks.py
+    "$PYTHON" RC4/rc4_attacks.py
     
     echo ""
     print_section "Exercise 2.2 - DES"
-    python3 DES/des_modes.py
+    "$PYTHON" DES/des_modes.py
     
     echo ""
     print_section "Exercise 2.3 - AES"
-    python3 AES/aes_modes.py
+    "$PYTHON" AES/aes_modes.py
     
     echo ""
     print_section "Exercise 2.4 - NIST Finalists"
-    python3 AES/nist_finalists.py
+    "$PYTHON" AES/nist_finalists.py
 fi
 
 echo ""

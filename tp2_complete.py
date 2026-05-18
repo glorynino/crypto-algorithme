@@ -4,34 +4,24 @@ TP 2 - CRYPTOGRAPHIE SYMÉTRIQUE MODERNE
 Complete test suite for RC4, DES/3DES, and AES with vulnerabilities
 """
 
-import sys
-import os
+from crypto_paths import setup_tp2_paths
 
-# Add paths for imports
-crypto_root = '/home/matt-anis/Studies/Crypto'
-sys.path.insert(0, crypto_root)
-sys.path.insert(0, os.path.join(crypto_root, 'RC4'))
-sys.path.insert(0, os.path.join(crypto_root, 'DES'))
-sys.path.insert(0, os.path.join(crypto_root, 'AES'))
+setup_tp2_paths()
 
-
-def print_section(title):
-    """Print formatted section header"""
-    print("\n" + "=" * 80)
-    print(f"  {title}")
-    print("=" * 80)
-
-
-def print_subsection(title):
-    """Print formatted subsection header"""
-    print("\n" + "-" * 80)
-    print(f"  {title}")
-    print("-" * 80)
+from tp_console import (
+    banner,
+    end_footer,
+    error_exercise,
+    ok,
+    print_block,
+    section,
+    summary,
+)
 
 
 def exercise_2_1_rc4():
     """Exercise 2.1 - RC4 Stream Cipher"""
-    print_section("EXERCICE 2.1 - RC4 (CHIFFREMENT PAR FLOT)")
+    section("2.1 — RC4 (CHIFFREMENT PAR FLOT)")
     
     try:
         from rc4_attacks import (
@@ -47,7 +37,7 @@ def exercise_2_1_rc4():
         rc4_statistical_bias_analysis()
         rc4_keystream_correlation()
         
-        print("\n✓ RC4 Exercises Completed")
+        ok("Exercice RC4 terminé")
         
     except Exception as e:
         print(f"✗ Error in RC4 exercise: {e}")
@@ -55,7 +45,7 @@ def exercise_2_1_rc4():
 
 def exercise_2_2_des():
     """Exercise 2.2 - DES and Triple-DES"""
-    print_section("EXERCICE 2.2 - DES ET TRIPLE-DES")
+    section("2.2 — DES ET TRIPLE-DES")
     
     try:
         from des_modes import (
@@ -84,7 +74,7 @@ def exercise_2_2_des():
 
 def exercise_2_3_aes():
     """Exercise 2.3 - AES Advanced Encryption Standard"""
-    print_section("EXERCICE 2.3 - AES (ADVANCED ENCRYPTION STANDARD)")
+    section("2.3 — AES (ADVANCED ENCRYPTION STANDARD)")
     
     try:
         from aes_modes import (
@@ -115,7 +105,7 @@ def exercise_2_3_aes():
 
 def exercise_2_4_nist_finalists():
     """Exercise 2.4 - NIST AES Finalists"""
-    print_section("EXERCICE 2.4 - LES 5 FINALISTES NIST (1997-2000)")
+    section("2.4 — LES 5 FINALISTES NIST (1997-2000)")
     
     try:
         from nist_finalists import (
@@ -141,9 +131,9 @@ def exercise_2_4_nist_finalists():
 
 def comparison_summary():
     """Create comprehensive comparison table"""
-    print_section("SYNTHÈSE: COMPARAISON RC4, DES, AES")
+    summary("COMPARAISON RC4, DES, AES")
     
-    print("""
+    print_block("""
 ┌─────────────┬──────────────┬──────────────┬──────────────┬──────────────┐
 │  Critère    │      RC4     │      DES     │      AES     │   État       │
 ├─────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
@@ -178,47 +168,40 @@ Algorithmes alternatif modernes:
 
 def main():
     """Execute all TP 2 exercises"""
-    
-    print("\n")
-    print("╔" + "═" * 78 + "╗")
-    print("║" + " " * 20 + "TP 2 - CRYPTOGRAPHIE SYMÉTRIQUE MODERNE" + " " * 18 + "║")
-    print("║" + " " * 15 + "RC4, DES, 3DES, AES, et 5 finalistes NIST" + " " * 20 + "║")
-    print("╚" + "═" * 78 + "╝")
+    banner(2, "CRYPTOGRAPHIE SYMÉTRIQUE MODERNE", "RC4, DES, 3DES, AES, finalistes NIST")
     
     try:
         exercise_2_1_rc4()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 2.1: {e}")
+        error_exercise("2.1", e)
         import traceback
         traceback.print_exc()
     
     try:
         exercise_2_2_des()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 2.2: {e}")
+        error_exercise("2.2", e)
         import traceback
         traceback.print_exc()
     
     try:
         exercise_2_3_aes()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 2.3: {e}")
+        error_exercise("2.3", e)
         import traceback
         traceback.print_exc()
     
     try:
         exercise_2_4_nist_finalists()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 2.4: {e}")
+        error_exercise("2.4", e)
         import traceback
         traceback.print_exc()
     
     comparison_summary()
     
-    print("\n" + "=" * 80)
-    print("RÉSUMÉ: VULNÉRABILITÉS PAR ALGORITHME")
-    print("=" * 80)
-    print("""
+    summary("VULNÉRABILITÉS PAR ALGORITHME")
+    print_block("""
 RC4 (Stream Cipher):
   ✗ WEP Vulnerability: IV scheduling faible → clé trouvée avec ~1.5M packets
   ✗ Statistical bias: Biais dans 2ème byte et autres positions
@@ -263,9 +246,7 @@ Raison du choix Rijndael:
   → Décision pragmatique correcte (25+ ans de succès)
     """)
     
-    print("\n" + "=" * 80)
-    print("FIN DU TP 2")
-    print("=" * 80 + "\n")
+    end_footer(2)
 
 
 if __name__ == "__main__":

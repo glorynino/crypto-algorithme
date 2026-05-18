@@ -4,16 +4,9 @@ Exercices intégrés: César, Vigenère, Hill, OTP
 Démonstration complète des vulnérabilités
 """
 
-import sys
-import os
+from crypto_paths import setup_tp1_paths
 
-# Add all necessary paths
-crypto_root = '/home/matt-anis/Studies/Crypto'
-sys.path.insert(0, crypto_root)
-sys.path.insert(0, os.path.join(crypto_root, 'Caesar cipher'))
-sys.path.insert(0, os.path.join(crypto_root, 'Vignere cipher'))
-sys.path.insert(0, os.path.join(crypto_root, 'HILL'))
-sys.path.insert(0, os.path.join(crypto_root, 'OTP algorithm'))
+setup_tp1_paths()
 
 # Import Caesar cipher modules
 from caesar import caesar_cipher, caesar_decipher
@@ -41,92 +34,86 @@ from hill_attacks import known_plaintext_attack_hill, verify_key
 from otp import encryption, decryption
 from otp_attacks import otp_key_reuse_attack, crib_dragging_attack
 
-
-def print_section(title):
-    """Print formatted section header."""
-    print("\n" + "=" * 80)
-    print(f"  {title}")
-    print("=" * 80)
-
-
-def print_subsection(title):
-    """Print formatted subsection header."""
-    print("\n" + "-" * 80)
-    print(f"  {title}")
-    print("-" * 80)
+from tp_console import (
+    banner,
+    demo,
+    end_footer,
+    error_exercise,
+    info,
+    label,
+    print_block,
+    result,
+    section,
+    subsection,
+    summary,
+)
 
 
 def exercise_1_1_caesar():
     """Exercice 1.1 - Chiffre de César"""
-    print_section("EXERCICE 1.1 - CHIFFRE DE CÉSAR")
+    section("1.1 — CHIFFRE DE CÉSAR")
     
     plaintext = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG"
     shift = 7
     ciphertext = caesar_cipher(plaintext, shift)
     
-    print(f"\nClair:        {plaintext}")
-    print(f"Clé (shift):  {shift}")
-    print(f"Chiffré:      {ciphertext}")
+    label("Clair", plaintext)
+    label("Clé (shift)", shift)
+    label("Chiffré", ciphertext)
     
-    # Déchiffrement
     decrypted = caesar_decipher(ciphertext, shift)
-    print(f"\nDéchiffré:    {decrypted}")
-    print(f"Correct:      {'✓ OUI' if decrypted == plaintext else '✗ NON'}")
+    label("Déchiffré", decrypted)
+    result("Vérification", decrypted == plaintext)
     
-    # Attaque 1: Force brute
-    print_subsection("Attaque 1 - Force Brute (avec dictionnaire)")
-    print(f"\nL'attaquant n'a que le chiffré: {ciphertext}\n")
+    subsection("Attaque 1 — Force Brute (avec dictionnaire)")
+    info(f"L'attaquant n'a que le chiffré : {ciphertext}")
     
     candidates = brute_force_caesar(ciphertext, top_n=3)
     for i, (try_shift, try_plain, score) in enumerate(candidates, 1):
         print(f"{i}. Shift {try_shift:2d}: {try_plain[:50]:50s} | Confiance: {score:.1%}")
     
-    # Attaque 2: Analyse de fréquences (IC)
-    print_subsection("Attaque 2 - Analyse de Fréquences (Indice de Coïncidence)")
+    subsection("Attaque 2 — Analyse de Fréquences (Indice de Coïncidence)")
     
     ic_plain = calculate_index_of_coincidence(plaintext)
     ic_cipher = calculate_index_of_coincidence(ciphertext)
     
-    print(f"\nIC du clair:     {ic_plain:.4f}")
-    print(f"IC du chiffré:  {ic_cipher:.4f}")
-    print(f"IC français:    0.0740 (référence)")
+    label("IC du clair", f"{ic_plain:.4f}")
+    label("IC du chiffré", f"{ic_cipher:.4f}")
+    label("IC français", "0.0740 (référence)")
     
     shift_recovered, plain_recovered, ic_recovered = frequency_analysis_caesar(ciphertext)
     
-    print(f"\nAttaque IC:")
-    print(f"  Shift détecté:  {shift_recovered}")
-    print(f"  IC obtenu:      {ic_recovered:.4f}")
-    print(f"  Clair trouvé:   {plain_recovered[:50]}")
+    info("Résultat attaque IC :")
+    label("Shift détecté", shift_recovered)
+    label("IC obtenu", f"{ic_recovered:.4f}")
+    label("Clair trouvé", plain_recovered[:50])
     
-    # Attaque 3: Chi-squared
-    print_subsection("Attaque 3 - Analyse Chi-squared")
+    subsection("Attaque 3 — Analyse Chi-squared")
     
     candidates_chi = chi_squared_attack_caesar(ciphertext, top_n=3)
-    print(f"\nTop 3 candidats (chi-squared):")
+    info("Top 3 candidats (chi-squared) :")
     for i, (try_shift, try_plain, chi_sq) in enumerate(candidates_chi, 1):
         print(f"{i}. Shift {try_shift:2d}: χ² = {chi_sq:8.2f} | {try_plain[:50]}")
 
 
 def exercise_1_2_vigenere():
     """Exercice 1.2 - Chiffre de Vigenère"""
-    print_section("EXERCICE 1.2 - CHIFFRE DE VIGENÈRE")
+    section("1.2 — CHIFFRE DE VIGENÈRE")
     
     plaintext = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG" * 2
     key = "SECRET"
     ciphertext = encrypt_vignere(plaintext, key)
     
-    print(f"\nClair:   {plaintext[:60]}...")
-    print(f"Clé:     {key}")
-    print(f"Chiffré: {ciphertext[:60]}...")
+    label("Clair", f"{plaintext[:60]}...")
+    label("Clé", key)
+    label("Chiffré", f"{ciphertext[:60]}...")
     
-    # Déchiffrement
     decrypted = decrypt_vignere(ciphertext, key)
-    print(f"\nDéchiffré correctement: {'✓ OUI' if decrypted == plaintext else '✗ NON'}")
+    result("Déchiffrement", decrypted == plaintext)
     
-    # Attaque 1: Test de Kasiski
-    print_subsection("Attaque 1 - Test de Kasiski (Trigrammes Répétés)")
+    subsection("Attaque 1 — Test de Kasiski (Trigrammes Répétés)")
     
-    print(f"\nRecherche de trigrammes répétés...")
+    info("Recherche de trigrammes répétés…")
     kasiski_results = kasiski_test(ciphertext)
     
     print(f"Trigrammes/patterns répétés trouvés: {len(kasiski_results)}")
@@ -140,8 +127,7 @@ def exercise_1_2_vigenere():
     for key_len, votes in key_length_estimates[:5]:
         print(f"  Longueur {key_len}: {votes} votes")
     
-    # Attaque 2: Analyse IC
-    print_subsection("Attaque 2 - Analyse par Indice de Coïncidence")
+    subsection("Attaque 2 — Analyse par Indice de Coïncidence")
     
     ic_scores, (best_length, best_ic) = index_of_coincidence_attack(ciphertext)
     
@@ -155,13 +141,12 @@ def exercise_1_2_vigenere():
     
     print(f"\nLongueur de clé estimée: {best_length} (IC={best_ic:.4f})")
     
-    # Attaque 3: Récupération de clé
-    print_subsection("Attaque 3 - Récupération de la Clé")
+    subsection("Attaque 3 — Récupération de la Clé")
     
     recovered_key = recover_key_from_ic(ciphertext, best_length)
     
-    print(f"\nClé originale:   {key}")
-    print(f"Clé récupérée:   {recovered_key}")
+    label("Clé originale", key)
+    label("Clé récupérée", recovered_key)
     
     if len(recovered_key) == len(key):
         matches = sum(1 for a, b in zip(recovered_key, key) if a == b)
@@ -176,10 +161,9 @@ def exercise_1_2_vigenere():
 
 def exercise_1_3_hill():
     """Exercice 1.3 - Chiffre de Hill"""
-    print_section("EXERCICE 1.3 - CHIFFRE DE HILL")
+    section("1.3 — CHIFFRE DE HILL")
     
-    # Hill 2x2
-    print_subsection("Hill 2×2")
+    demo("Hill 2×2")
     
     plaintext_2x2 = "HILLCIPHER"
     key_2x2 = [[5, 8], [17, 3]]
@@ -199,7 +183,7 @@ def exercise_1_3_hill():
     print(f"Correct: {'✓ OUI' if decrypted_2x2.rstrip('X') == plaintext_2x2 else '✗ NON'}")
     
     # Attaque: Connaissant clair et chiffré
-    print_subsection("Attaque à Clair Connu (2×2)")
+    subsection("Attaque à Clair Connu (2×2)")
     
     print(f"\nL'attaquant sait:")
     print(f"  Clair:   {plaintext_2x2}")
@@ -225,7 +209,7 @@ def exercise_1_3_hill():
         print(f"Erreur: {e}")
     
     # Hill 3x3
-    print_subsection("Hill 3×3")
+    demo("Hill 3×3")
     
     plaintext_3x3 = "SECRETMESSAGE"
     key_3x3 = [[1, 2, 3], [0, 5, 2], [2, 0, 3]]
@@ -240,7 +224,7 @@ def exercise_1_3_hill():
     print(f"Chiffré: {ciphertext_3x3}")
     
     # Attaque 3x3
-    print_subsection("Attaque à Clair Connu (3×3)")
+    subsection("Attaque à Clair Connu (3×3)")
     
     try:
         recovered_key_3x3 = known_plaintext_attack_hill(plaintext_3x3, ciphertext_3x3, block_size=3)
@@ -257,10 +241,9 @@ def exercise_1_3_hill():
 
 def exercise_1_4_otp():
     """Exercice 1.4 - One-Time Pad (Vernam)"""
-    print_section("EXERCICE 1.4 - ONE-TIME PAD (VERNAM)")
+    section("1.4 — ONE-TIME PAD (VERNAM)")
     
-    # Chiffrement/déchiffrement basique
-    print_subsection("OTP Basique")
+    demo("OTP Basique")
     
     message = "THEQUICKBROWNFOX"
     ciphertext, key = encryption(message)
@@ -273,7 +256,7 @@ def exercise_1_4_otp():
     print(f"Correct: {'✓ OUI' if decrypted == message else '✗ NON'}")
     
     # Vulnérabilité: Réutilisation de clé
-    print_subsection("Vulnérabilité: Réutilisation de Clé")
+    subsection("Vulnérabilité — Réutilisation de Clé")
     
     m1 = "HELLO"
     m2 = "WORLD"
@@ -293,7 +276,7 @@ def exercise_1_4_otp():
     print(f"  Match:     {'✓ OUI (VULNÉRABLE!)' if result['ciphertext1_xor_ciphertext2'] == result['message1_xor_message2'] else '✗ NON'}")
     
     # Crib dragging
-    print_subsection("Attaque: Crib Dragging")
+    subsection("Attaque — Crib Dragging")
     
     m1_long = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG"
     m2_long = "THEATTACKERHASTHESECRETKEY"
@@ -318,35 +301,30 @@ def exercise_1_4_otp():
 
 def main():
     """Exécuter tous les exercices du TP 1"""
-    print("\n")
-    print("╔" + "═" * 78 + "╗")
-    print("║" + " " * 20 + "TP 1 - CHIFFREMENT CLASSIQUE" + " " * 30 + "║")
-    print("║" + " " * 16 + "César, Vigenère, Hill, OTP (Vernam)" + " " * 26 + "║")
-    print("╚" + "═" * 78 + "╝")
+    banner(1, "CHIFFREMENT CLASSIQUE", "César, Vigenère, Hill, OTP (Vernam)")
     
     try:
         exercise_1_1_caesar()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 1.1: {e}")
+        error_exercise("1.1", e)
     
     try:
         exercise_1_2_vigenere()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 1.2: {e}")
+        error_exercise("1.2", e)
     
     try:
         exercise_1_3_hill()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 1.3: {e}")
+        error_exercise("1.3", e)
     
     try:
         exercise_1_4_otp()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 1.4: {e}")
+        error_exercise("1.4", e)
     
-    # Résumé
-    print_section("RÉSUMÉ DES VULNÉRABILITÉS")
-    print("""
+    summary("RÉSUMÉ DES VULNÉRABILITÉS")
+    print_block("""
     CÉSAR:
       ✗ Espace de clé très petit (26 possibilités)
       ✗ Vulnérable à la force brute
@@ -378,9 +356,7 @@ def main():
       Passage aux chiffreurs modernes (AES, ChaCha20) est nécessaire.
     """)
     
-    print("\n" + "=" * 80)
-    print("FIN DU TP 1")
-    print("=" * 80 + "\n")
+    end_footer(1)
 
 
 if __name__ == "__main__":

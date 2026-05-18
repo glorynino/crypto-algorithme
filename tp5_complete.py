@@ -4,11 +4,9 @@ TP 5 - Digital Signatures
 Complete test suite for RSA, ElGamal, DSA, and ECDSA signatures
 """
 
-import sys
-import os
+from crypto_paths import setup_project_root
 
-# Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+setup_project_root()
 
 from Signatures.rsa_signatures import RSASignature, rsa_generate_keypair
 from Signatures.elgamal_signatures import ElGamalSignature
@@ -16,17 +14,20 @@ from Signatures.dsa import DSA
 from Signatures.ecdsa import ECDSA, EllipticCurve
 from Signatures.signature_attacks import ecdsa_nonce_reuse_attack
 
-
-def print_header(text):
-    """Print formatted header."""
-    print("\n" + "=" * 80)
-    print(f"  {text}")
-    print("=" * 80)
+from tp_console import (
+    banner,
+    end_footer,
+    error_exercise,
+    info,
+    ok,
+    section,
+    summary,
+)
 
 
 def exercice_5_1_rsa():
     """Exercise 5.1: RSA Signatures (PKCS#1 v1.5 and PSS)."""
-    print_header("EXERCICE 5.1 - RSA SIGNATURES (PKCS#1 v1.5)")
+    section("5.1 — RSA SIGNATURES (PKCS#1 v1.5)")
     
     print("\nRSA Signature Process:")
     print("  • Sign: S ≡ H(M)^d (mod n) with private key")
@@ -70,7 +71,7 @@ def exercice_5_1_rsa():
 
 def exercice_5_2_elgamal():
     """Exercise 5.2: ElGamal Signatures."""
-    print_header("EXERCICE 5.2 - ELGAMAL SIGNATURES")
+    section("5.2 — ELGAMAL SIGNATURES")
     
     print("\nElGamal Signature Process:")
     print("  • Based on discrete logarithm problem")
@@ -135,7 +136,7 @@ def exercice_5_2_elgamal():
 
 def exercice_5_3_dsa():
     """Exercise 5.3: DSA Signatures."""
-    print_header("EXERCICE 5.3 - DSA (DIGITAL SIGNATURE ALGORITHM)")
+    section("5.3 — DSA (DIGITAL SIGNATURE ALGORITHM)")
     
     print("\nDSA Signature Process:")
     print("  • Sign: (r, s) where r = (g^k mod p) mod q")
@@ -192,7 +193,7 @@ def exercice_5_3_dsa():
 
 def exercice_5_4_ecdsa():
     """Exercise 5.4: ECDSA Signatures."""
-    print_header("EXERCICE 5.4 - ECDSA (ELLIPTIC CURVE DIGITAL SIGNATURE)")
+    section("5.4 — ECDSA (ELLIPTIC CURVE DIGITAL SIGNATURE)")
     
     print("\nECDSA Signature Process:")
     print("  • Sign: (r, s) where r = (k*G).x mod n")
@@ -252,7 +253,7 @@ def exercice_5_4_ecdsa():
 
 def signature_comparison():
     """Compare all signature algorithms."""
-    print_header("SIGNATURE ALGORITHM COMPARISON")
+    summary("COMPARAISON DES ALGORITHMES DE SIGNATURE")
     
     print("\n┌──────────────┬──────────────┬──────────────┬──────────────┬──────────────┐")
     print("│ Property     │     RSA      │   ElGamal    │      DSA     │     ECDSA    │")
@@ -284,13 +285,7 @@ def signature_comparison():
 
 def main():
     """Run all TP5 exercises."""
-    print("\n")
-    print("╔" + "=" * 78 + "╗")
-    print("║" + " " * 78 + "║")
-    print("║" + "TP 5 - DIGITAL SIGNATURES".center(78) + "║")
-    print("║" + "RSA, ElGamal, DSA, ECDSA".center(78) + "║")
-    print("║" + " " * 78 + "║")
-    print("╚" + "=" * 78 + "╝")
+    banner(5, "SIGNATURES NUMÉRIQUES", "RSA, ElGamal, DSA, ECDSA")
     
     try:
         exercice_5_1_rsa()
@@ -299,18 +294,14 @@ def main():
         exercice_5_4_ecdsa()
         signature_comparison()
         
-        print_header("TP 5 - DIGITAL SIGNATURES TEST SUITE COMPLETE")
-        print("\n✓ All exercises completed successfully")
-        print("ℹ Summary:")
-        print("  • RSA: PKCS#1 v1.5 and PSS padding schemes tested")
-        print("  • ElGamal: Discrete log-based signatures")
-        print("  • DSA: Federal standard signature algorithm")
-        print("  • ECDSA: Modern elliptic curve signatures")
-        print("  • All support signing, verification, and forgery detection")
-        print("\n")
+        summary("SUITE TP5 TERMINÉE")
+        ok("Tous les exercices ont réussi")
+        info("RSA, ElGamal, DSA, ECDSA : signature et vérification testées")
+        
+        end_footer(5)
         
     except Exception as e:
-        print(f"\n✗ Error: {e}")
+        error_exercise("TP5", e)
         import traceback
         traceback.print_exc()
 

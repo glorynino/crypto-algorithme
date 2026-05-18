@@ -4,28 +4,33 @@ TP 4 - Cryptographic Hash Functions
 Complete test suite for MD5, SHA-256, SHA-512 and their vulnerabilities
 """
 
-import sys
 import os
 import hashlib
 import time
 
-# Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from crypto_paths import setup_project_root
+
+setup_project_root()
 
 from MD5.md5 import md5_str
 from SHA.sha256 import sha256_str
 
-
-def print_header(text):
-    """Print formatted header."""
-    print("\n" + "=" * 80)
-    print(f"  {text}")
-    print("=" * 80)
+from tp_console import (
+    banner,
+    demo,
+    end_footer,
+    error_exercise,
+    info,
+    ok,
+    section,
+    subsection,
+    summary,
+)
 
 
 def exercice_4_1_md5():
     """Exercise 4.1: MD5 Analysis."""
-    print_header("EXERCICE 4.1 - MD5 (MESSAGE DIGEST 5)")
+    section("4.1 — MD5 (MESSAGE DIGEST 5)")
     
     print("\nMD5 Properties:")
     print("  • Output: 128 bits (16 bytes)")
@@ -34,9 +39,7 @@ def exercice_4_1_md5():
     print("  • Status: BROKEN (collisions found in 2004)")
     print("  • Use: Legacy support, checksums only")
     
-    print("\n" + "-" * 80)
-    print("Test Vector Suite:")
-    print("-" * 80)
+    demo("Jeu de tests MD5")
     
     test_vectors = [
         (b"", "d41d8cd98f00b204e9800998ecf8427e"),
@@ -81,12 +84,12 @@ def exercice_4_1_md5():
     print(f"MD5 bits changed: {bit_diff}/{total_bits} ({flip_rate:.1f}%)")
     print(f"Status: {'✓ Good avalanche' if 40 < flip_rate < 60 else '⚠ Unexpected result'}")
     
-    print("\n✓ MD5 Exercises Completed")
+    ok("Exercice MD5 terminé")
 
 
 def exercice_4_2_sha256():
     """Exercise 4.2: SHA-256 Implementation."""
-    print_header("EXERCICE 4.2 - SHA-256 (SECURE HASH ALGORITHM 256)")
+    section("4.2 — SHA-256 (SECURE HASH ALGORITHM 256)")
     
     print("\nSHA-256 Properties:")
     print("  • Output: 256 bits (32 bytes)")
@@ -117,12 +120,12 @@ def exercice_4_2_sha256():
         data_display = data[:43].decode('utf-8', errors='ignore') if len(data) <= 43 else data[:40].decode('utf-8', errors='ignore') + "..."
         print(f"{data_display:<45} {lib_hash:<35} ✓")
     
-    print("\n✓ SHA-256 Exercises Completed")
+    ok("Exercice SHA-256 terminé")
 
 
 def exercice_4_3_comparison():
     """Exercise 4.3: SHA-512 and General Comparison."""
-    print_header("EXERCICE 4.3 - HASH FUNCTION COMPARISON")
+    section("4.3 — HASH FUNCTION COMPARISON")
     
     print("\nAlgorithm Properties Comparison:")
     print("-" * 80)
@@ -188,12 +191,12 @@ def exercice_4_3_comparison():
         results_avalanche[name] = flip_rate
         print(f"{name:<15} {flip_rate:.1f}% bits changed (ideal: ~50%)")
     
-    print("\n✓ Comparison Complete")
+    ok("Comparaison terminée")
 
 
 def collision_resistance_analysis():
     """Demonstrate collision resistance."""
-    print_header("COLLISION RESISTANCE ANALYSIS")
+    subsection("Analyse — Résistance aux collisions")
     
     print("\nBirthday Paradox Applied to Hash Functions:")
     print("-" * 80)
@@ -224,18 +227,12 @@ def collision_resistance_analysis():
     print("  ✓ RECOMMENDED for security-critical applications")
     print("  ✓ Used in Bitcoin, TLS, code signing")
     
-    print("\n✓ Analysis Complete")
+    ok("Analyse des collisions terminée")
 
 
 def main():
     """Run all TP4 exercises."""
-    print("\n")
-    print("╔" + "=" * 78 + "╗")
-    print("║" + " " * 78 + "║")
-    print("║" + "TP 4 - CRYPTOGRAPHIC HASH FUNCTIONS".center(78) + "║")
-    print("║" + "MD5, SHA-256, SHA-512 - Analysis & Security".center(78) + "║")
-    print("║" + " " * 78 + "║")
-    print("╚" + "=" * 78 + "╝")
+    banner(4, "FONCTIONS DE HACHAGE", "MD5, SHA-256, SHA-512 — analyse et sécurité")
     
     try:
         exercice_4_1_md5()
@@ -243,17 +240,16 @@ def main():
         exercice_4_3_comparison()
         collision_resistance_analysis()
         
-        print_header("TP 4 - HASH FUNCTIONS TEST SUITE COMPLETE")
-        print("\n✓ All exercises completed successfully")
-        print("ℹ Summary:")
-        print("  • MD5: Broken, use SHA-256/SHA-512 instead")
-        print("  • SHA-256: Strong, widely used")
-        print("  • SHA-512: Strong, faster on 64-bit CPUs")
-        print("  • HMAC: Use for message authentication")
-        print("\n")
+        summary("SUITE TP4 TERMINÉE")
+        ok("Tous les exercices ont réussi")
+        info("MD5 : cassé → préférer SHA-256 / SHA-512")
+        info("SHA-256 / SHA-512 : recommandés pour la sécurité")
+        info("HMAC : authentification des messages")
+        
+        end_footer(4)
         
     except Exception as e:
-        print(f"\n✗ Error: {e}")
+        error_exercise("TP4", e)
         import traceback
         traceback.print_exc()
 

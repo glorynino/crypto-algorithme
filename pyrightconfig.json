@@ -1,0 +1,21 @@
+{
+  "venvPath": ".",
+  "venv": "env",
+  "extraPaths": [
+    ".",
+    "Caesar cipher",
+    "Vignere cipher",
+    "HILL",
+    "OTP algorithm",
+    "RC4",
+    "DES",
+    "AES",
+    "DH",
+    "RSA",
+    "ElGamal",
+    "ECC",
+    "MD5",
+    "SHA",
+    "Signatures"
+  ]
+}

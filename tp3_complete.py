@@ -4,35 +4,23 @@ TP 3 - CRYPTOGRAPHIE ASYMÉTRIQUE
 Complete test suite for DH, RSA, ElGamal, and ECC with vulnerabilities
 """
 
-import sys
-import os
+from crypto_paths import setup_tp3_paths
 
-# Add paths for imports
-crypto_root = '/home/matt-anis/Studies/Crypto'
-sys.path.insert(0, crypto_root)
-sys.path.insert(0, os.path.join(crypto_root, 'DH'))
-sys.path.insert(0, os.path.join(crypto_root, 'RSA'))
-sys.path.insert(0, os.path.join(crypto_root, 'ElGamal'))
-sys.path.insert(0, os.path.join(crypto_root, 'ECC'))
+setup_tp3_paths()
 
-
-def print_section(title):
-    """Print formatted section header"""
-    print("\n" + "=" * 80)
-    print(f"  {title}")
-    print("=" * 80)
-
-
-def print_subsection(title):
-    """Print formatted subsection header"""
-    print("\n" + "-" * 80)
-    print(f"  {title}")
-    print("-" * 80)
+from tp_console import (
+    banner,
+    end_footer,
+    error_exercise,
+    print_block,
+    section,
+    summary,
+)
 
 
 def exercise_3_1_dh():
     """Exercise 3.1 - Diffie-Hellman"""
-    print_section("EXERCICE 3.1 - DIFFIE-HELLMAN (ÉCHANGE DE CLÉS)")
+    section("3.1 — DIFFIE-HELLMAN (ÉCHANGE DE CLÉS)")
     
     try:
         from dh import DH, DH_Parameters, test_basic_dh
@@ -65,7 +53,7 @@ def exercise_3_1_dh():
 
 def exercise_3_2_rsa():
     """Exercise 3.2 - RSA"""
-    print_section("EXERCICE 3.2 - RSA (CHIFFREMENT ASYMÉTRIQUE)")
+    section("3.2 — RSA (CHIFFREMENT ASYMÉTRIQUE)")
     
     try:
         from rsa import generate_keypair, test_rsa
@@ -101,7 +89,7 @@ def exercise_3_2_rsa():
 
 def exercise_3_3_elgamal():
     """Exercise 3.3 - ElGamal"""
-    print_section("EXERCICE 3.3 - ELGAMAL (CHIFFREMENT À CLÉS PUBLIQUES)")
+    section("3.3 — ELGAMAL (CHIFFREMENT À CLÉS PUBLIQUES)")
     
     try:
         from elgamal import test_elgamal
@@ -133,7 +121,7 @@ def exercise_3_3_elgamal():
 
 def exercise_3_4_ecc():
     """Exercise 3.4 - Elliptic Curve Cryptography"""
-    print_section("EXERCICE 3.4 - CRYPTOGRAPHIE SUR COURBES ELLIPTIQUES")
+    section("3.4 — CRYPTOGRAPHIE SUR COURBES ELLIPTIQUES")
     
     try:
         from ecc import ecdh_example, ecdsa_signature_example
@@ -167,9 +155,9 @@ def exercise_3_4_ecc():
 
 def comparison_summary():
     """Create comprehensive comparison table"""
-    print_section("SYNTHÈSE: COMPARAISON DH, RSA, ELGAMAL, ECC")
+    summary("COMPARAISON DH, RSA, ELGAMAL, ECC")
     
-    print("""
+    print_block("""
 ┌─────────────┬──────────────┬──────────────┬──────────────┬──────────────┐
 │  Critère    │      DH      │      RSA     │   ElGamal    │      ECC     │
 ├─────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
@@ -222,38 +210,31 @@ Algorithme sélection moderne (TLS 1.3):
 
 def main():
     """Execute all TP 3 exercises"""
-    
-    print("\n")
-    print("╔" + "═" * 78 + "╗")
-    print("║" + " " * 20 + "TP 3 - CRYPTOGRAPHIE ASYMÉTRIQUE" + " " * 24 + "║")
-    print("║" + " " * 12 + "Diffie-Hellman, RSA, ElGamal, et Courbes Elliptiques" + " " * 12 + "║")
-    print("╚" + "═" * 78 + "╝")
+    banner(3, "CRYPTOGRAPHIE ASYMÉTRIQUE", "Diffie-Hellman, RSA, ElGamal, courbes elliptiques")
     
     try:
         exercise_3_1_dh()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 3.1: {e}")
+        error_exercise("3.1", e)
     
     try:
         exercise_3_2_rsa()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 3.2: {e}")
+        error_exercise("3.2", e)
     
     try:
         exercise_3_3_elgamal()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 3.3: {e}")
+        error_exercise("3.3", e)
     
     try:
         exercise_3_4_ecc()
     except Exception as e:
-        print(f"\n✗ Erreur Exercice 3.4: {e}")
+        error_exercise("3.4", e)
     
     comparison_summary()
     
-    print("\n" + "=" * 80)
-    print("FIN DU TP 3")
-    print("=" * 80 + "\n")
+    end_footer(3)
 
 
 if __name__ == "__main__":

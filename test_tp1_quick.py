@@ -2,13 +2,9 @@
 """
 Quick test of TP 1 implementations - Caesar attack
 """
-import sys, os
+from crypto_paths import setup_tp1_paths
 
-sys.path.insert(0, '/home/matt-anis/Studies/Crypto')
-sys.path.insert(0, '/home/matt-anis/Studies/Crypto/Caesar cipher')
-sys.path.insert(0, '/home/matt-anis/Studies/Crypto/Vignere cipher')
-sys.path.insert(0, '/home/matt-anis/Studies/Crypto/HILL')
-sys.path.insert(0, '/home/matt-anis/Studies/Crypto/OTP algorithm')
+setup_tp1_paths()
 
 from caesar import caesar_cipher, caesar_decipher
 from caesar_attacks import brute_force_caesar, chi_squared_attack_caesar, calculate_index_of_coincidence

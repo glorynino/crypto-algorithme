@@ -23,8 +23,18 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-WORKSPACE="/home/matt-anis/Studies/Crypto"
-PYTHON_CMD="python3"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE="$SCRIPT_DIR"
+
+if [ -x "$WORKSPACE/env/bin/python3" ]; then
+    PYTHON_CMD="$WORKSPACE/env/bin/python3"
+elif [ -x "$WORKSPACE/.venv/bin/python3" ]; then
+    PYTHON_CMD="$WORKSPACE/.venv/bin/python3"
+elif [ -x "$WORKSPACE/env/Scripts/python.exe" ]; then
+    PYTHON_CMD="$WORKSPACE/env/Scripts/python.exe"
+else
+    PYTHON_CMD="$(command -v python3 || command -v python)"
+fi
 LOG_FILE="tp3_test_results.log"
 VERBOSE=false
 QUIET=false
